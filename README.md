@@ -77,11 +77,7 @@ podman-compose down
 # Method 1: Using CDI (recommended)
 podman run --device nvidia.com/gpu=all -it --rm fedora-cuda-base:latest
 
-# Method 2: Using hooks (alternative)
-podman run --security-opt=label=disable --hooks-dir=/usr/share/containers/oci/hooks.d/ -it --rm fedora-cuda-base:latest
-```
-
-### Option 3: Interactive session with workspace mount
+### Option 2: Interactive session with workspace mount
 
 ```bash
 podman run --device nvidia.com/gpu=all -v ./workspace:/workspace:Z -it --rm fedora-cuda-base:latest
@@ -151,10 +147,91 @@ If you encounter GPU access issues:
 - **CUDA version mismatch**: The container uses CUDA 11.8 with compatible PyTorch 2.2.0 for stability
 - **cuDNN library not found**: PyTorch 2.2.0 includes bundled cuDNN 8 libraries. The container uses PyTorch's cuDNN instead of system cuDNN to avoid version conflicts. Use the included `debug-cudnn.sh` script for troubleshooting cuDNN issues
 
+## Examples
+
+This repository now supports building specialized containers on top of the base CUDA image. Examples demonstrate common GPU-accelerated use cases.
+
+### Available Examples
+
+#### Whisper (Speech Recognition)
+GPU-accelerated speech recognition and transcription using OpenAI Whisper.
+
+**Build:**
+```bash
+./build.sh whisper
+```
+
+**Usage:**
+```bash
+# Basic transcription
+podman run --device nvidia.com/gpu=all -v ./workspace:/workspace:Z \
+  -it --rm fedora-cuda-whisper:latest \
+  whisper /workspace/audio.wav --model medium
+
+# Generate subtitles
+podman run --device nvidia.com/gpu=all -v ./workspace:/workspace:Z \
+  -it --rm fedora-cuda-whisper:latest \
+  whisper /workspace/audio.wav --model medium --output_format srt
+```
+
+**Features:**
+- Multiple Whisper model sizes (tiny, base, small, medium, large)
+- Support for WAV, MP3, M4A, FLAC audio formats
+- Output formats: text, SRT, VTT, TSV, JSON
+- GPU acceleration for faster transcription
+- Faster-whisper integration for improved performance
+
+**Documentation:** See [`examples/whisper/README.md`](examples/whisper/README.md) for detailed usage instructions.
+
+### Building Examples
+
+The build system automatically manages dependencies:
+
+```bash
+# Build base container (default)
+./build.sh
+./build.sh base
+
+# Build whisper example (builds base first if needed)
+./build.sh whisper
+
+# Get help
+./build.sh help
+```
+
+### Creating New Examples
+
+To create a new example:
+
+1. **Create directory structure:**
+   ```bash
+   mkdir -p examples/your-example
+   ```
+
+2. **Add Containerfile:**
+   ```dockerfile
+   FROM fedora-cuda-base:latest
+   # Your example-specific setup
+   ```
+
+3. **Create README.md** with usage instructions
+
+4. **Update build.sh** to support your new target
+
+5. **Test the build:**
+   ```bash
+   ./build.sh your-example
+   ```
+
 ## Files Structure
 
-- `Containerfile` - Container build definition
+- `Containerfile` - Base container build definition
 - `podman-compose.yml` - Podman compose configuration
-- `build.sh` - Build script
+- `build.sh` - Enhanced build script with example support
 - `test-gpu.sh` - GPU test script
+- `examples/` - Example containers built on the base image
+  - `whisper/` - Speech recognition example
+    - `Containerfile` - Whisper container definition
+    - `README.md` - Whisper usage documentation
+- `plan/` - Project documentation and PRD
 - `workspace/` - Shared workspace directory

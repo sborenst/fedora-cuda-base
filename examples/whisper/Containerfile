@@ -1,0 +1,46 @@
+FROM fedora-cuda-base:latest
+
+# Set working directory
+WORKDIR /workspace
+
+# Install Whisper and dependencies
+RUN pip3 install --upgrade pip && \
+    pip3 install \
+        openai-whisper \
+        faster-whisper \
+        transformers \
+        datasets \
+        accelerate
+
+# Enable RPM Fusion repository for FFmpeg
+RUN dnf install -y \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
+        && dnf clean all
+
+# Install additional audio processing tools
+RUN dnf install -y \
+        ffmpeg \
+        ffmpeg-devel \
+        vulkan-loader mesa-vulkan-drivers \
+        && dnf clean all
+
+# Install additional Python audio libraries
+RUN pip3 install \
+        pydub \
+        librosa \
+        soundfile \
+        audioread
+
+# Create workspace directory
+RUN mkdir -p /workspace
+
+# Set environment variables for optimal performance
+ENV TRANSFORMERS_CACHE=/workspace/.cache/transformers
+ENV HF_HOME=/workspace/.cache/huggingface
+
+# Create cache directories
+RUN mkdir -p /workspace/.cache/transformers /workspace/.cache/huggingface
+
+# Set default command to bash for interactive use
+CMD ["/bin/bash"]
