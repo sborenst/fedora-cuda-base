@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  cuda-base:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: fedora-cuda-base:latest
+    container_name: cuda-base-container
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ./workspace:/workspace:Z
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    stdin_open: true
+    tty: true
+    devices:
+      - nvidia.com/gpu=all
+    security_opt:
+      - label=disable
