@@ -7,7 +7,7 @@ WORKDIR /workspace
 RUN pip3 install --upgrade pip && \
     pip3 install \
         openai-whisper \
-        faster-whisper \
+        "faster-whisper==0.8.0" \
         transformers \
         datasets \
         accelerate

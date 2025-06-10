@@ -49,9 +49,9 @@ if [ $? -eq 0 ]; then
     echo ""
     print_info "To run whisper with GPU support:"
     echo ""
-    echo "  podman run --device nvidia.com/gpu=all -v ../../workspace:/workspace:Z \\"
-    echo "    -it --rm fedora-cuda-whisper:latest \\"
-    echo "    whisper /workspace/audio.wav --model medium"
+    echo "  podman run --device nvidia.com/gpu=all -v ./workspace:/workspace:Z \"
+    echo "  -it --rm fedora-cuda-whisper:latest \"
+    echo "  whisper /workspace/audio.wav --model base"
     echo ""
     print_info "See README.md for detailed usage instructions."
 else
